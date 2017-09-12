@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.developairs</groupId>
+    <artifactId>GCDApp</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>GCDApp</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.version>1</project.version>
+        <version.jboss.maven.plugin>1.5.0</version.jboss.maven.plugin>
+
+        <!-- other plugin versions -->
+        <version.ear.plugin>2.8</version.ear.plugin>
+        <version.ejb.plugin>2.3</version.ejb.plugin>
+        <version.surefire.plugin>2.10</version.surefire.plugin>
+        <version.war.plugin>2.1.1</version.war.plugin>
+
+        <!-- maven-compiler-plugin -->
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+    </properties>
+
+    <modules>
+        <module>ejb</module>
+        <module>web</module>
+        <module>ear</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>com.developairs</groupId>
+                <artifactId>GCDApp-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            
+            <dependency>
+                <groupId>com.developairs</groupId>
+                <artifactId>GCDApp-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+                <scope>compile</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.jboss.as.plugins</groupId>
+                    <artifactId>jboss-as-maven-plugin</artifactId>
+                    <version>${version.jboss.maven.plugin}</version>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+    <profiles>
+        <profile>
+            <id>jboss-product-repository</id>
+            <activation>
+                <property>
+                    <name>!jboss-product-repository</name>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>redhat-techpreview-all-repository</id>
+                    <url>http://maven.repository.redhat.com/techpreview/all/</url>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+</project>
