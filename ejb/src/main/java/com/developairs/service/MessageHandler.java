@@ -58,6 +58,10 @@ public class MessageHandler {
 		memberEventSrc.fire(m1);
 		memberEventSrc.fire(m2);
 	}
+	
+	public void save(Message message){
+		em.persist(message);
+	}
 
 	@Inject
 	@JMSConnectionFactory("java:/ConnectionFactory")
