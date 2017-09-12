@@ -1,5 +1,0 @@
-com\developairs\util\WebResources.class
-com\developairs\rest\JaxRsActivator.class
-com\developairs\rest\QueueRESTService.class
-com\developairs\rest\dto\PushDTO.class
-com\developairs\soap\GCDWebService.class

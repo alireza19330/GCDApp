@@ -1,0 +1,6 @@
+.settings/
+ear/target/
+ejb/target/
+web/target/
+.project
+
