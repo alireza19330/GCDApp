@@ -1,6 +1,18 @@
 .settings/
+
+ear/.settings/
 ear/target/
+ear/.project
+
+ejb/.settings/
 ejb/target/
+ejb/.classpath
+ejb/.project
+
+web/.settings/
 web/target/
+web/.classpath
+web/.project
+
 .project
 
