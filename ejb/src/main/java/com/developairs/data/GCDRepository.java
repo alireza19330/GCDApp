@@ -1,14 +1,11 @@
 package com.developairs.data;
 
-import java.lang.reflect.Member;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.Query;
 
 import com.developairs.model.GCD;
 
@@ -21,26 +18,20 @@ public class GCDRepository {
     public GCD findById(Long id) {
         return em.find(GCD.class, id);
     }
+    
+    @SuppressWarnings("unchecked")
+	public List<Integer> getAllGCDOrderbyDate() {
+		Query createQuery = em.createQuery("SELECT g.value from GCD g ORDER BY g.addedDate");
+		List<Integer> resultList = createQuery.getResultList();
+		return resultList;
+	}
 
-    public Member findByEmail(String email) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Member> criteria = cb.createQuery(Member.class);
-        Root<Member> member = criteria.from(Member.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(member).where(cb.equal(member.get(Member_.email), email));
-        criteria.select(member).where(cb.equal(member.get("email"), email));
-        return em.createQuery(criteria).getSingleResult();
-    }
-
-    public List<Member> findAllOrderedByName() {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Member> criteria = cb.createQuery(Member.class);
-        Root<Member> member = criteria.from(Member.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(member).orderBy(cb.asc(member.get(Member_.name)));
-        criteria.select(member).orderBy(cb.asc(member.get("name")));
-        return em.createQuery(criteria).getResultList();
-    }
+	public long getSumOfAllGCD() {
+		Query createQuery = em.createQuery("SELECT SUM(g.value) from GCD g");
+		return (long) createQuery.getSingleResult();
+	}
+	
+	public void save(GCD gcd){
+		em.persist(gcd);
+	}
 }

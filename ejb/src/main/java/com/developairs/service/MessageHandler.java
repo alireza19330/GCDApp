@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -18,9 +17,9 @@ import javax.jms.JMSProducer;
 import javax.jms.MessageConsumer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
+import com.developairs.data.GCDRepository;
+import com.developairs.data.MessageRepository;
 import com.developairs.model.GCD;
 import com.developairs.model.Message;
 
@@ -31,37 +30,13 @@ public class MessageHandler {
 	private Logger log;
 
 	@Inject
-	private EntityManager em;
+	private MessageRepository messageRepository;
+
+	/*@Inject
+	private Event<Message> memberEventSrc;*/
 
 	@Inject
-	private Event<Message> memberEventSrc;
-
-	public void register(int i1, int i2) throws Exception{
-		log.info("Registering <" + i1 + "," + i2 + ">");
-		Message m1 = new Message(i1);
-		Message m2 = new Message(i2);
-
-		em.persist(m1);
-		em.persist(m2);
-
-		JMSProducer producer = context.createProducer();
-
-		ObjectMessage om1 = context.createObjectMessage();
-		om1.setObject(m1.getNumber());
-
-		ObjectMessage om2 = context.createObjectMessage();
-		om2.setObject(m2.getNumber());
-
-		producer.send(destination, om1);
-		producer.send(destination, om2);
-
-		memberEventSrc.fire(m1);
-		memberEventSrc.fire(m2);
-	}
-	
-	public void save(Message message){
-		em.persist(message);
-	}
+	private GCDRepository gcdRepository;
 
 	@Inject
 	@JMSConnectionFactory("java:/ConnectionFactory")
@@ -70,21 +45,95 @@ public class MessageHandler {
 	@Resource(name="java:/jms/CGDQueue")
 	private Destination destination;
 
-	@SuppressWarnings("unchecked")
-	public List<Integer> getAllMessages() {
-		Query createQuery = em.createQuery("SELECT m.number from Message m ORDER BY m.addedDate");
-		List<Integer> resultList = createQuery.getResultList();
-		return resultList;
-	}
-
 	@Resource
 	private ConnectionFactory connectionFactory;
 
-	public int getGCD() throws Exception{
-		//TODO refactor
-		
+
+	public void handleMessages(int i1, int i2) throws Exception {
+		log.fine("Registering <" + i1 + "," + i2 + ">");
+		Message m1 = new Message(i1);
+		Message m2 = new Message(i2);
+
+		this.saveMessage(m1);
+		this.saveMessage(m2);
+
+		JMSProducer producer = context.createProducer();
+
+		ObjectMessage om1 = null, om2 = null;
+		try {
+			om1 = context.createObjectMessage();
+			om2 = context.createObjectMessage();
+			om1.setObject(m1.getNumber());
+			om2.setObject(m2.getNumber());
+		} catch (Exception e) {
+			log.severe("Unable to create ObjectMessage: " + e.getMessage());
+			throw e;
+		}
+
+		try {
+			producer.send(destination, om1);
+			producer.send(destination, om2);
+		} catch (Exception e) {
+			log.severe("Unable to send on queue: " + e.getMessage());
+			throw e;
+		}
+		//		memberEventSrc.fire(m1);
+		//		memberEventSrc.fire(m2);
+	}
+
+	private void saveMessage(Message message){
+		try {
+			messageRepository.save(message);
+		} catch (Exception e) {
+			log.severe("Unable to save Message to db: "+e.getMessage());
+			throw e;
+		}
+	}
+
+	public List<Integer> getAllMessages() {
+		try {
+			return messageRepository.findAllNumbersOrderByDate();
+		} catch (Exception e) {
+			log.severe("Unable to get all messages from db: "+e.getMessage());
+			throw e;
+		}
+	}
+
+	public int getGCD() throws Exception {
+		//TODO define custom exception
+
+		javax.jms.Message message = null;
+		javax.jms.Message message2 = null;
+		try {
+			message = this.readAMessageFromQueue();
+			message2 = this.readAMessageFromQueue();
+		} catch (Exception e) {
+			log.warning("Unable to read from the queue: "+e.getMessage());
+			throw e;
+		}
+
+		int i1 = -1;
+		int i2 = -1;
+		try {
+			ObjectMessage om = (ObjectMessage)message;
+			i1 = (Integer)om.getObject();
+			om = (ObjectMessage)message2;
+			i2 = (Integer)om.getObject();
+		} catch (Exception e) {
+			log.severe("Unable to cast data which is read from the queue: "+e.getMessage());
+			throw e;
+		}
+
+		int calculatedGCD = calcGCD(i1, i2);
+		GCD gcd = new GCD(calculatedGCD);
+
+		this.saveGCD(gcd);
+		return calculatedGCD;
+	}
+
+	private javax.jms.Message readAMessageFromQueue() throws JMSException{
 		Connection connection = connectionFactory.createConnection();
-		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		Session session = connection.createSession();
 
 		MessageConsumer messageConsumer = session.createConsumer(destination);
 		connection.start();
@@ -92,70 +141,55 @@ public class MessageHandler {
 		try {
 			message = messageConsumer.receive(2000);
 			if (message == null) {
+				//TODO log
 				throw new JMSException("Timeout");
 			}
 		} catch (JMSException e) {
-			// TODO: handle exception
-			connection.close();
-			throw e;
-		}
-		int i1 = -1;
-		try {
-			ObjectMessage om = (ObjectMessage)message;
-			i1 = (Integer)om.getObject();
-			System.out.println(i1);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			// TODO: log
 			connection.close();
 			throw e;
 		}
 
-		try {
-			message = messageConsumer.receive(2000);
-			if (message == null) {
-				throw new JMSException("Timeout");
-			}
-		} catch (JMSException e) {
-			// TODO: handle exception
-			connection.close();
-			throw e;
-		}
-		
-		int i2 = -1;
-		try {
-			ObjectMessage om = (ObjectMessage)message;
-			i2 = (Integer)om.getObject();
-			System.out.println(i2);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			throw e;
-		}finally{
-			connection.close();
-		}
-
-
-		int calculatedGCD = calcGCD(i1, i2);
-		GCD gcd = new GCD(calculatedGCD);
-		em.persist(gcd);
-		return calculatedGCD;
+		connection.close();
+		return message;
 	}
 
 	private int calcGCD(int a, int b) {
-		BigInteger b1 = BigInteger.valueOf(a);
-		BigInteger b2 = BigInteger.valueOf(b);
-		BigInteger gcd = b1.gcd(b2);
-		return gcd.intValue();
+		try {
+			BigInteger b1 = BigInteger.valueOf(a);
+			BigInteger b2 = BigInteger.valueOf(b);
+			BigInteger gcd = b1.gcd(b2);
+			return gcd.intValue();
+		} catch (Exception e) {
+			log.severe("Unable to calculate GCD: "+e.getMessage());
+			throw e;
+		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Integer> gcdList(){
-		Query createQuery = em.createQuery("SELECT g.value from GCD g ORDER BY g.addedDate");
-		List<Integer> resultList = createQuery.getResultList();
-		return resultList;
+		try {
+			return gcdRepository.getAllGCDOrderbyDate();
+		} catch (Exception e) {
+			log.severe("Unable to get all GCDs from db: "+e.getMessage());
+			throw e;
+		}
 	}
 
 	public long gcdSum(){
-		Query createQuery = em.createQuery("SELECT SUM(g.value) from GCD g");
-		return (long) createQuery.getSingleResult();
+		try {
+			return gcdRepository.getSumOfAllGCD();
+		} catch (Exception e) {
+			log.severe("Unable to get sum of all GCDs from db: "+e.getMessage());
+			throw e;
+		}
+	}
+
+	private void saveGCD(GCD gcd){
+		try {
+			gcdRepository.save(gcd);
+		} catch (Exception e) {
+			log.severe("Unable to save GCD to the db: "+e.getMessage());
+			throw e;
+		}
 	}
 }

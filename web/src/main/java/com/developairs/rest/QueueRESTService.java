@@ -38,7 +38,7 @@ public class QueueRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     public String pushToQueue(PushDTO dto) {
     	try{
-    		messageHandler.register(dto.getI1(), dto.getI2());
+    		messageHandler.handleMessages(dto.getI1(), dto.getI2());
     	}catch(Exception e){
     		log.severe("unable to register parameters<"+dto.getI1()+","+dto.getI2()+"> "+e.getMessage());
     		return Constants.MSG_FAIL;
