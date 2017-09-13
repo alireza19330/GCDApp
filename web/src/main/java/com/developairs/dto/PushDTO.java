@@ -1,4 +1,4 @@
-package com.developairs.rest.dto;
+package com.developairs.dto;
 
 public class PushDTO {
 	private int i1;

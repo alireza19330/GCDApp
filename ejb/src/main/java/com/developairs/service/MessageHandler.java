@@ -20,6 +20,8 @@ import javax.jms.Session;
 
 import com.developairs.data.GCDRepository;
 import com.developairs.data.MessageRepository;
+import com.developairs.exception.GCDAppException;
+import com.developairs.exception.ResponseCode;
 import com.developairs.model.GCD;
 import com.developairs.model.Message;
 
@@ -49,7 +51,7 @@ public class MessageHandler {
 	private ConnectionFactory connectionFactory;
 
 
-	public void handleMessages(int i1, int i2) throws Exception {
+	public void handleMessages(int i1, int i2) throws GCDAppException {
 		log.fine("Registering <" + i1 + "," + i2 + ">");
 		Message m1 = new Message(i1);
 		Message m2 = new Message(i2);
@@ -67,7 +69,7 @@ public class MessageHandler {
 			om2.setObject(m2.getNumber());
 		} catch (Exception e) {
 			log.severe("Unable to create ObjectMessage: " + e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_OBJECT_MSG, "Unable to create ObjectMessage", e);
 		}
 
 		try {
@@ -75,7 +77,7 @@ public class MessageHandler {
 			producer.send(destination, om2);
 		} catch (Exception e) {
 			log.severe("Unable to send on queue: " + e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_SEND_QUEUE, "Unable to send on queue", e);
 		}
 		//		memberEventSrc.fire(m1);
 		//		memberEventSrc.fire(m2);
@@ -86,21 +88,20 @@ public class MessageHandler {
 			messageRepository.save(message);
 		} catch (Exception e) {
 			log.severe("Unable to save Message to db: "+e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_DB, "Unable to save Message to db", e);
 		}
 	}
 
-	public List<Integer> getAllMessages() {
+	public List<Integer> getAllMessages() throws GCDAppException{
 		try {
 			return messageRepository.findAllNumbersOrderByDate();
 		} catch (Exception e) {
 			log.severe("Unable to get all messages from db: "+e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_DB, "Unable to get all messages from db", e);
 		}
 	}
 
-	public int getGCD() throws Exception {
-		//TODO define custom exception
+	public int getGCD() throws GCDAppException {
 
 		javax.jms.Message message = null;
 		javax.jms.Message message2 = null;
@@ -109,7 +110,7 @@ public class MessageHandler {
 			message2 = this.readAMessageFromQueue();
 		} catch (Exception e) {
 			log.warning("Unable to read from the queue: "+e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_RECEIVE_QUEUE, "Unable to read from the queue", e);
 		}
 
 		int i1 = -1;
@@ -121,7 +122,7 @@ public class MessageHandler {
 			i2 = (Integer)om.getObject();
 		} catch (Exception e) {
 			log.severe("Unable to cast data which is read from the queue: "+e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_RECEIVE_QUEUE, "Unable to cast data which is read from the queue", e);
 		}
 
 		int calculatedGCD = calcGCD(i1, i2);
@@ -141,11 +142,9 @@ public class MessageHandler {
 		try {
 			message = messageConsumer.receive(2000);
 			if (message == null) {
-				//TODO log
 				throw new JMSException("Timeout");
 			}
 		} catch (JMSException e) {
-			// TODO: log
 			connection.close();
 			throw e;
 		}
@@ -154,7 +153,7 @@ public class MessageHandler {
 		return message;
 	}
 
-	private int calcGCD(int a, int b) {
+	private int calcGCD(int a, int b) throws GCDAppException {
 		try {
 			BigInteger b1 = BigInteger.valueOf(a);
 			BigInteger b2 = BigInteger.valueOf(b);
@@ -162,34 +161,38 @@ public class MessageHandler {
 			return gcd.intValue();
 		} catch (Exception e) {
 			log.severe("Unable to calculate GCD: "+e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_CALCULATE, "Unable to calculate GCD", e);
 		}
 	}
 
-	public List<Integer> gcdList(){
+	public List<Integer> gcdList() throws GCDAppException{
 		try {
 			return gcdRepository.getAllGCDOrderbyDate();
 		} catch (Exception e) {
 			log.severe("Unable to get all GCDs from db: "+e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_DB, "Unable to get all GCDs from db", e);
 		}
 	}
 
-	public long gcdSum(){
+	public long gcdSum() throws GCDAppException{
 		try {
-			return gcdRepository.getSumOfAllGCD();
+			List<Integer> allGCD = gcdRepository.getSumOfAllGCD();
+			if (allGCD == null || allGCD.isEmpty()) {
+				return -1;
+			}
+			return allGCD.stream().mapToInt(Integer::intValue).sum();
 		} catch (Exception e) {
 			log.severe("Unable to get sum of all GCDs from db: "+e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_DB, "Unable to get sum of all GCDs from db", e);
 		}
 	}
 
-	private void saveGCD(GCD gcd){
+	private void saveGCD(GCD gcd) throws GCDAppException{
 		try {
 			gcdRepository.save(gcd);
 		} catch (Exception e) {
 			log.severe("Unable to save GCD to the db: "+e.getMessage());
-			throw e;
+			throw new GCDAppException(ResponseCode.ERR_DB, "Unable to save GCD to the db", e);
 		}
 	}
 }

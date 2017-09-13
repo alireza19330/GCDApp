@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.developairs.data.MessageRepository;
+import com.developairs.exception.GCDAppException;
 import com.developairs.model.Message;
 import com.developairs.service.MessageHandler;
 import com.developairs.util.Resources;
@@ -30,6 +31,7 @@ public class JMSQueueTest {
 				.addPackage(MessageRepository.class.getPackage())
 				.addPackage(MessageHandler.class.getPackage())
 				.addPackage(Message.class.getPackage())
+				.addPackage(GCDAppException.class.getPackage())
 				.addClasses(Member.class, Message.class, Resources.class, MessageHandler.class, MessageRepository.class)
 				.addAsResource("META-INF/test-persistence.xml", "META-INF/persistence.xml")
 				.addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")

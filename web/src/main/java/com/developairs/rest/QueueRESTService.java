@@ -11,10 +11,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.developairs.rest.dto.ListDTO;
-import com.developairs.rest.dto.PushDTO;
+import com.developairs.dto.ListDTO;
+import com.developairs.dto.PushDTO;
+import com.developairs.exception.GCDAppException;
+import com.developairs.exception.ResponseCode;
 import com.developairs.service.MessageHandler;
-import com.developairs.util.Constants;
 
 
 @Path("/queue")
@@ -29,20 +30,34 @@ public class QueueRESTService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public ListDTO list() {
-        return new ListDTO(messageHandler.getAllMessages());
+    	try{
+    		ListDTO listDTO = new ListDTO(messageHandler.getAllMessages(), ResponseCode.SUCCESSFUL.toString());
+    		log.info("service[rest] method[list] user[] response["+ResponseCode.SUCCESSFUL+"]");
+    		return listDTO;
+    	} catch(GCDAppException e){
+    		log.severe("service[rest] method[list] user[] response["+e.getCode().getValue()+"]");
+    		return new ListDTO(null, e.getCode().toString());
+    	} catch (Exception e) {
+			log.severe("service[rest] method[list] user[] response["+ResponseCode.ERR_UNKNOW+"]");
+			return new ListDTO(null, ResponseCode.ERR_UNKNOW.toString());
+		}
     }
 
-    @POST
+	@POST
     @Path("/push")
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     public String pushToQueue(PushDTO dto) {
-    	try{
+    	try {
     		messageHandler.handleMessages(dto.getI1(), dto.getI2());
-    	}catch(Exception e){
-    		log.severe("unable to register parameters<"+dto.getI1()+","+dto.getI2()+"> "+e.getMessage());
-    		return Constants.MSG_FAIL;
-    	}
-        return Constants.MSG_SUCCESSFUL;
+    		log.info("service[rest] method[push] user[] response["+ResponseCode.SUCCESSFUL+"]");
+    		return ResponseCode.SUCCESSFUL.toString();
+		} catch (GCDAppException e) {
+			log.severe("service[rest] method[push] user[] response["+e.getCode().getValue()+"]");
+			return e.getCode().toString();
+		} catch (Exception e) {
+			log.severe("service[rest] method[push] user[] response["+ResponseCode.ERR_UNKNOW+"]");
+			return ResponseCode.ERR_UNKNOW.toString();
+		}
     }
 }
