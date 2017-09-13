@@ -29,7 +29,7 @@ public class Message implements Serializable {
 
     @NotNull
     @Column(name = "added_date")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date addedDate;
 
 	public Message(int number) {
