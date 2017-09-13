@@ -1,6 +1,7 @@
 package com.developairs.test;
 
 import java.lang.reflect.Member;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ejb.EJB;
@@ -50,9 +51,19 @@ public class JMSQueueTest {
 		int i1 = 10;
 		int i2 = 20;
 		messageHandler.handleMessages(i1, i2);
-		Assert.assertEquals(i1,(int)messageHandler.getAllMessages().get(0));
-		Assert.assertEquals(i2,(int)messageHandler.getAllMessages().get(1));
+		List<Integer> allMessages = messageHandler.getAllMessages();
+		Assert.assertEquals(i1,(int)allMessages.get(0));
+		Assert.assertEquals(i2,(int)allMessages.get(1));
 		log.info("messages can be added");
+		
+		//DEQUEU
+		int gcd = messageHandler.getGCD();
+		int nextGCD = -1;
+		try {
+			nextGCD = messageHandler.getGCD();
+		} catch (GCDAppException e) {
+		}
+		Assert.assertEquals(-1, nextGCD);
 	}
 	
 	//TODO add more test
