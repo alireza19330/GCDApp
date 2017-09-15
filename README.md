@@ -40,17 +40,22 @@ This format of logging is really useful specially in production environment wher
 	- WEB_SERVICE_TYPE: will be "soap" for SOAP services and "rest" for REST services.
 	- METHOD_NAME: will be one of the gcd, gcdList, gcdSum, push, list depending to the called method
 	- USERNAME: username of the user invoked the service, we used certificate base authentication therefore username would be common name of the certificate
-	- RESPONSE_CODE: is a number, the numbers and their definitions can be seen in ResponseCode enum. 
+	- RESPONSE_CODE: is a number, the numbers and their definitions can be seen in ResponseCode enum.
+	
+TEST & RUN
+----------
+- To test and run the project Maven needs to be installed.
+- Arquillian coupled with junit is used as the test framework for this project.
+- Test cases are located in the "com.developairs.test.JMSQueueTest" class. More test cases can be added too.
+- To run the test cases run the following command in the ejb directory of the project: mvn clean test -Parq-jbossas-managed
+- To create .ear package just run the command "mvn clean install" in the root directory of the project.
 
 
-
-
-
-
-
-
-
-
-
-
+SERVER OUTAGE
+-------------
+- To make application tolerant of server outage there are 2 options:
+	1- Using JBoss EAP features to replicate application servers.
+	2- Using third-party solutions such as HA Proxy (http://www.haproxy.org/) to do so.
+- First approach has its own advantages because JBoss EAP handles all issues related to the stateless beans, stateful beans and http sessions of the users and maintains connections to database and handle cache issues. (https://access.redhat.com/documentation/en-us/reference_architectures/2017/html-single/configuring_a_red_hat_jboss_eap_7_cluster/)
+- Second approach can be used because it offers load balancing and high availability features on behalf of the application server and can help the server to reduce its process and workload. All the services in this application are stateless and there is no session for the logged in users so the later way can be utilized too. We can have two totally separated application servers on two physical or virtual servers which run same version of the application and work with a same queue and database instance. However, JPA implementation (here Hibernate) actually should bypass its cache and retrieve data directly from the database because in this approach two instance of jpa implementation are running and they do not know anything about each other.
 
