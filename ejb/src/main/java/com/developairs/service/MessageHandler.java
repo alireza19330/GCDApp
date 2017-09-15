@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.annotation.Resource;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.Connection;
@@ -50,7 +51,7 @@ public class MessageHandler {
 	@Resource
 	private ConnectionFactory connectionFactory;
 
-
+	@RolesAllowed("restclient")
 	public void handleMessages(int i1, int i2) throws GCDAppException {
 		log.fine("Registering <" + i1 + "," + i2 + ">");
 		Message m1 = new Message(i1);
@@ -92,6 +93,7 @@ public class MessageHandler {
 		}
 	}
 
+	@RolesAllowed("restclient")
 	public List<Integer> getAllMessages() throws GCDAppException{
 		try {
 			return messageRepository.findAllNumbersOrderByDate();
@@ -101,6 +103,7 @@ public class MessageHandler {
 		}
 	}
 
+	@RolesAllowed("soapclient")
 	public int getGCD() throws GCDAppException {
 
 		javax.jms.Message message = null;
@@ -165,7 +168,8 @@ public class MessageHandler {
 		}
 	}
 
-	public List<Integer> gcdList() throws GCDAppException{
+	@RolesAllowed("soapclient")
+	public List<Integer> getGcdList() throws GCDAppException{
 		try {
 			return gcdRepository.getAllGCDOrderbyDate();
 		} catch (Exception e) {
@@ -174,7 +178,8 @@ public class MessageHandler {
 		}
 	}
 
-	public long gcdSum() throws GCDAppException{
+	@RolesAllowed("soapclient")
+	public long getGcdSum() throws GCDAppException{
 		try {
 			List<Integer> allGCD = gcdRepository.getSumOfAllGCD();
 			if (allGCD == null || allGCD.isEmpty()) {

@@ -1,12 +1,15 @@
 package com.developairs.soap;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 //import javax.jms.JMSException;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.xml.ws.WebServiceContext;
 
 import com.developairs.dto.GCDListDTO;
 import com.developairs.dto.GCDSumDTO;
@@ -14,6 +17,7 @@ import com.developairs.dto.GCD_DTO;
 import com.developairs.exception.GCDAppException;
 import com.developairs.exception.ResponseCode;
 import com.developairs.service.MessageHandler;
+import com.developairs.util.ExceptionHandler;
 
 @WebService(serviceName="gcd")
 public class GCDWebService {
@@ -24,19 +28,32 @@ public class GCDWebService {
 	@Inject
 	private Logger logger;
 
+	@Resource
+	private WebServiceContext wsContext;
+	
+	private String getLogin(){
+		try {
+			Principal userPrincipal = wsContext.getUserPrincipal();
+			return userPrincipal.getName();
+		} catch (Exception e) {
+			throw new GCDAppException(ResponseCode.ERR_AUTHENTICATION, "Unable to get user principal from the context", e);
+		}
+	}
+
 	@WebMethod
 	public GCDListDTO gcdList(){
+
 		List<Integer> gcdList = null;
 		String responseCode = ResponseCode.SUCCESSFUL.toString();
+		String username = "";
 		try {
-			gcdList = messageHandler.gcdList();
-			logger.info("service[soap] method[gcdlist] user[] response["+ResponseCode.SUCCESSFUL+"]");
-		} catch (GCDAppException e) {
-			responseCode = e.getCode().toString();
-			logger.severe("service[soap] method[gcdlist] user[] response["+e.getCode().getValue()+"]");
-		} catch (Exception e) {
-			responseCode = ResponseCode.ERR_UNKNOW.toString();
-			logger.severe("service[soap] method[gcdlist] user[] response["+ResponseCode.ERR_UNKNOW+"]");
+			username = getLogin();
+			gcdList = messageHandler.getGcdList();
+			logger.info("service[soap] method[gcdlist] user["+username+"] response["+ResponseCode.SUCCESSFUL+"]");
+		} catch(Exception e){
+			GCDAppException ex = ExceptionHandler.normalizeException(e);
+			responseCode = ex.getCode().toString();
+			logger.severe("service[soap] method[gcdlist] user["+username+"] response["+ex.getCode().getValue()+"]");
 		}
 		return new GCDListDTO(responseCode, gcdList);
 	}
@@ -45,15 +62,15 @@ public class GCDWebService {
 	public GCDSumDTO gcdSum(){
 		long gcdSum = -1;
 		String responseCode = ResponseCode.SUCCESSFUL.toString();
+		String username = "";
 		try {
-			gcdSum = messageHandler.gcdSum();
-			logger.info("service[soap] method[gcdsum] user[] response["+ResponseCode.SUCCESSFUL+"]");
-		} catch (GCDAppException e) {
-			responseCode = e.getCode().toString();
-			logger.severe("service[soap] method[gcdsum] user[] response["+e.getCode().getValue()+"]");
+			username = getLogin();
+			gcdSum = messageHandler.getGcdSum();
+			logger.info("service[soap] method[gcdsum] user["+username+"] response["+ResponseCode.SUCCESSFUL+"]");
 		} catch (Exception e) {
-			responseCode = ResponseCode.ERR_UNKNOW.toString();
-			logger.severe("service[soap] method[gcdsum] user[] response["+ResponseCode.ERR_UNKNOW+"]");
+			GCDAppException ex = ExceptionHandler.normalizeException(e);
+			responseCode = ex.getCode().toString();
+			logger.severe("service[soap] method[gcdsum] user["+username+"] response["+ex.getCode().getValue()+"]");
 		}
 		return new GCDSumDTO(responseCode, gcdSum);
 	}
@@ -62,15 +79,15 @@ public class GCDWebService {
 	public GCD_DTO gcd(){
 		int gcd = -1;
 		String responseCode = ResponseCode.SUCCESSFUL.toString();
+		String username = "";
 		try {
+			username = getLogin();
 			gcd = messageHandler.getGCD();
-			logger.info("service[soap] method[gcd] user[] response["+ResponseCode.SUCCESSFUL+"]");
-		} catch (GCDAppException e) {
-			responseCode = e.getCode().toString();
-			logger.severe("service[soap] method[gcd] user[] response["+e.getCode().getValue()+"]");
+			logger.info("service[soap] method[gcd] user["+username+"] response["+ResponseCode.SUCCESSFUL+"]");
 		} catch (Exception e) {
-			responseCode = ResponseCode.ERR_UNKNOW.toString();
-			logger.severe("service[soap] method[gcd] user[] response["+ResponseCode.ERR_UNKNOW+"]");
+			GCDAppException ex = ExceptionHandler.normalizeException(e);
+			responseCode = ex.getCode().toString();
+			logger.severe("service[soap] method[gcd] user["+username+"] response["+ex.getCode().getValue()+"]");
 		}
 		return new GCD_DTO(responseCode, gcd);
 	}
