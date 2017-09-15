@@ -51,8 +51,8 @@ TEST & RUN
 - To create .ear package just run the command "mvn clean install" in the root directory of the project.
 
 
-SERVER OUTAGE
--------------
+HIGH AVAILABILITY
+-----------------
 - To make application tolerant of server outage there are 2 options:
 	1- Using JBoss EAP features to replicate application servers.
 	2- Using third-party solutions such as HA Proxy (http://www.haproxy.org/) to do so.
