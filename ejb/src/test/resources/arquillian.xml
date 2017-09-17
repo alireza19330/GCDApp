@@ -16,7 +16,7 @@
 		<configuration>
 			<property name="chameleonTarget">jboss eap:7.0.0.Beta:remote</property>
 			<property name="managementAddress">127.0.0.1</property>
-			<property name="managementPort">10091</property>
+			<property name="managementPort">9991</property>
 			<property name="username">remote</property>
 			<property name="password">12345678</property>
 		</configuration>

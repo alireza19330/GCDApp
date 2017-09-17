@@ -47,7 +47,7 @@ TEST & RUN
 - To test and run the project Maven needs to be installed.
 - Arquillian coupled with junit is used as the test framework for this project.
 - Test cases are located in the "com.developairs.test.JMSQueueTest" class. More test cases can be added too.
-- To run the test cases run the following command in the ejb directory of the project: mvn clean test -Parq-jbossas-managed
+- To run the test cases JBoss should be up and running (Settings related to the port and IP is in arquillian.xml) and run the following command in the root directory of the project: mvn clean test -Parq-jbossas-managed
 - To create .ear package just run the command "mvn clean install" in the root directory of the project.
 
 
