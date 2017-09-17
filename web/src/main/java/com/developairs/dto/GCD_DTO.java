@@ -1,5 +1,9 @@
 package com.developairs.dto;
-
+/**
+ * 
+ * @author Ali Abazari
+ *
+ */
 public class GCD_DTO extends BaseDTO {
 	
 	private int gcd;

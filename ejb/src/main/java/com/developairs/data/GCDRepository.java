@@ -26,6 +26,7 @@ public class GCDRepository {
 		return resultList;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<Integer> getSumOfAllGCD() {
 //		Query createQuery = em.createQuery("SELECT SUM(g.value) from GCD g");
 //		return (long) createQuery.getSingleResult();

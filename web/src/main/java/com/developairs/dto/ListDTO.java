@@ -2,6 +2,11 @@ package com.developairs.dto;
 
 import java.util.List;
 
+/**
+ * 
+ * @author Ali Abazari
+ *
+ */
 public class ListDTO extends BaseDTO{
 	
 	private List<Integer> numbers;

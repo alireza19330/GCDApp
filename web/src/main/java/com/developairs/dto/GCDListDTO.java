@@ -1,7 +1,11 @@
 package com.developairs.dto;
 
 import java.util.List;
-
+/**
+ * 
+ * @author Ali Abazari
+ *
+ */
 public class GCDListDTO extends BaseDTO {
 	
 	private List<Integer> gcdList;

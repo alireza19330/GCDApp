@@ -26,6 +26,13 @@ import com.developairs.exception.ResponseCode;
 import com.developairs.model.GCD;
 import com.developairs.model.Message;
 
+/**
+ * 
+ * @author Ali Abazari
+ * <p>This class is an EJB stateless session bean which handles all requests come from clients either SOAP client or REST clients</p>
+ *
+ *
+ */
 @Stateless
 public class MessageHandler {
 
@@ -51,6 +58,14 @@ public class MessageHandler {
 	@Resource
 	private ConnectionFactory connectionFactory;
 
+	/**
+	 * 
+	 * <p>This method is just allowed for the users with the role <b>restclient</b><p>
+	 * @param i1 is the first integer which will be added to the database and the JMS queue
+	 * @param i2 is the second integer which will be added to the database and the JMS queue
+	 * @throws GCDAppException if something goes wrong, application will throw custom exception
+	 * @throws javax.ejb.EJBAccessExceptio if the caller user does not have the required role
+	 */
 	@RolesAllowed("restclient")
 	public void handleMessages(int i1, int i2) throws GCDAppException {
 		log.fine("Registering <" + i1 + "," + i2 + ">");
@@ -93,6 +108,12 @@ public class MessageHandler {
 		}
 	}
 
+	/**
+	 * <p>This method is just allowed for the users with the role <b>restclient</b><p>
+	 * @return list of all messages stored in db
+	 * @throws GCDAppException if something goes wrong, application will throw custom exception
+	 * @throws javax.ejb.EJBAccessExceptio if the caller user does not have the required role
+	 */
 	@RolesAllowed("restclient")
 	public List<Integer> getAllMessages() throws GCDAppException{
 		try {
@@ -103,6 +124,12 @@ public class MessageHandler {
 		}
 	}
 
+	/**
+	 * <p>This method is just allowed for the users with the role <b>soapclient</b><p>
+	 * @return the calculated GCD from the first two integers in the queue
+	 * @throws GCDAppException if something goes wrong, application will throw custom exception
+	 * @throws javax.ejb.EJBAccessExceptio if the caller user does not have the required role
+	 */
 	@RolesAllowed("soapclient")
 	public int getGCD() throws GCDAppException {
 
@@ -168,6 +195,12 @@ public class MessageHandler {
 		}
 	}
 
+	/**
+	 * <p>This method is just allowed for the users with the role <b>soapclient</b><p>
+	 * @return the list of calculated GCDs from database
+	 * @throws GCDAppException if something goes wrong, application will throw custom exception
+	 * @throws javax.ejb.EJBAccessExceptio if the caller user does not have the required role
+	 */
 	@RolesAllowed("soapclient")
 	public List<Integer> getGcdList() throws GCDAppException{
 		try {
@@ -178,6 +211,12 @@ public class MessageHandler {
 		}
 	}
 
+	/**
+	 * <p>This method is just allowed for the users with the role <b>soapclient</b><p>
+	 * @return the sum of the calculated GCDs
+	 * @throws GCDAppException if something goes wrong, application will throw custom exception
+	 * @throws javax.ejb.EJBAccessExceptio if the caller user does not have the required role
+	 */
 	@RolesAllowed("soapclient")
 	public long getGcdSum() throws GCDAppException{
 		try {

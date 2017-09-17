@@ -1,5 +1,9 @@
 package com.developairs.dto;
-
+/**
+ * 
+ * @author Ali Abazari
+ *
+ */
 public class GCDSumDTO extends BaseDTO{
 	
 	private Long sum;

@@ -19,6 +19,12 @@ import com.developairs.exception.ResponseCode;
 import com.developairs.service.MessageHandler;
 import com.developairs.util.ExceptionHandler;
 
+/**
+ * 
+ * @author Ali Abazari
+ * <p>This class defines the web methods for SOAP service</p>
+ *
+ */
 @WebService(serviceName="gcd")
 public class GCDWebService {
 
@@ -40,6 +46,10 @@ public class GCDWebService {
 		}
 	}
 
+	/**
+	 * 
+	 * @return {@link com.developairs.dto.GCDListDTO GCDListDTO} which contains list of GCDs and the response message
+	 */
 	@WebMethod
 	public GCDListDTO gcdList(){
 
@@ -58,6 +68,10 @@ public class GCDWebService {
 		return new GCDListDTO(responseCode, gcdList);
 	}
 
+	/**
+	 * 
+	 * @return {@link com.developairs.dto.GCDSumDTO GCDSumDTO} which contains sum of all calculated GCDs and the response message
+	 */
 	@WebMethod
 	public GCDSumDTO gcdSum(){
 		long gcdSum = -1;
@@ -75,6 +89,10 @@ public class GCDWebService {
 		return new GCDSumDTO(responseCode, gcdSum);
 	}
 
+	/**
+	 * 
+	 * @return {@link com.developairs.dto.GCD_DTO GCD_DTO} which contains the GCD of the two first integer in the queue and the response message
+	 */
 	@WebMethod
 	public GCD_DTO gcd(){
 		int gcd = -1;

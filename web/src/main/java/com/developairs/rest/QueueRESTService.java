@@ -21,7 +21,12 @@ import com.developairs.exception.ResponseCode;
 import com.developairs.service.MessageHandler;
 import com.developairs.util.ExceptionHandler;
 
-
+/**
+ * 
+ * @author Ali Abazari
+ * <p>In this class REST methods are defined</p>
+ *
+ */
 @Path("/queue")
 @RequestScoped
 public class QueueRESTService {
@@ -44,6 +49,10 @@ public class QueueRESTService {
 		}
 	}
 
+	/**
+	 * 
+	 * @return {@link com.developairs.dto.ListDTO ListDTO} object in JSON format to the clients
+	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public ListDTO list() {
@@ -60,6 +69,11 @@ public class QueueRESTService {
 		}
 	}
 
+	/**
+	 * 
+	 * @param dto {@link com.developairs.dto.PushDTO pushDTO} object in JSON format to the clients
+	 * @return Result of the service as a String: {@link com.developairs.exception.ResponseCode ResponseCode}
+	 */
 	@POST
 	@Path("/push")
 	@Produces(MediaType.TEXT_PLAIN)

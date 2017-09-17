@@ -1,5 +1,10 @@
 package com.developairs.dto;
 
+/**
+ * 
+ * @author Ali Abazari
+ *
+ */
 public class BaseDTO {
 	
 	private String response;
